@@ -55,6 +55,8 @@ well.
 
 `sudo apt install mpv`
 
+The player python script is replaced by a much simpler `start.sh` script.
+
 ## Touchscreen player control
 
 The Waveshare 2.8" screen has capacitive touch that wasn't used in the original
