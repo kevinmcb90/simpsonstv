@@ -63,6 +63,9 @@ continued to use the 32-bit Buster OS.
 I also glued in the screen upside down, since the bezel was better covered by
 the 3d printed housing that way. To invert the screen, set `display_rotate=3` in `/boot/config.txt`
 
+Switched from Micro-USB to USB-C for the power input. Use something like this
+[Adafruit USB Type-C breakout board](https://www.adafruit.com/product/4090). Make sure the breakout board has CC resistors that properly indicate 5 volts--otherwise this won't work with C-to-C cables.
+
 ## MPV Video player
 
 Because I was originally experimenting 64-bit Bookwork, I couldn't use omxplayer
