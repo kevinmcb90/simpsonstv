@@ -1,5 +1,7 @@
 I made some changes to Brandon Withrow's [Waveshare-version TV build](https://withrow.io/simpsons-tv-build-guide-waveshare).
 
+![tv demo](tv.gif)
+
 ## Touchscreen player control
 
 The Waveshare 2.8" screen has capacitive touch that wasn't used in the original
