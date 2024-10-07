@@ -2,7 +2,7 @@
 
 import evdev
 import logging
-import socket
+import os
 
 # This is oddly swapped. X is actually the long dimension on the physical screen.
 MAX_X = 480
@@ -14,60 +14,78 @@ X_MARGIN = 100
 # How far to seek fwd/back
 SEEK_SECS = 30
 
-# Must match MPV's --input-ipc-server flag
-SOCKET_PATH = "/tmp/mpvsocket"
+# Path to omxplayer control pipe (stdin)
+OMXPIPE = "/tmp/omxpipe"
 
 
-def SendMPV(msg: str):
-    logging.info("MPV command: %s", msg)
-    msg += "\n"
-    client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    client.connect(SOCKET_PATH)
-    sent = client.send(msg.encode())
-    response = client.recv(4096)
-    logging.info(f"Received response: {response.decode().strip()}")
-    client.close()
+# Function to send commands to omxplayer via stdin (using the named pipe)
+def SendOMX(msg: str):
+    # Check if the named pipe exists, and create it if it doesn't
+    if not os.path.exists(OMXPIPE):
+        try:
+            os.mkfifo(OMXPIPE)
+            logging.info(f"Created omxplayer control pipe at '{OMXPIPE}'")
+        except OSError as e:
+            logging.error(f"Failed to create pipe: {e}")
+            return  # Exit the function if the pipe can't be created
+
+    if msg == "pause":
+        os.system(f"echo -n p > {OMXPIPE}")
+    elif msg == f"seek {SEEK_SECS}":
+        os.system(f"echo -n \x1b[C > {OMXPIPE}")  # Right arrow for seek forward
+    elif msg == f"seek {-SEEK_SECS}":
+        os.system(f"echo -n \x1b[D > {OMXPIPE}")  # Left arrow for seek backward
+    else:
+        logging.warning(f"Unrecognized command: {msg}")
 
 
-# Commands here: https://mpv.io/manual/master/#json-ipc
+# Function to process touch input and send the appropriate command to omxplayer
 def Act(x: int, y: int, delta_x: int, delta_y: int):
     # Swipe left
     if delta_x < -(MAX_X / 2):
-        SendMPV("playlist-prev")
+        logging.info("Detected swipe left (previous)")
+        # You can implement playlist prev logic if needed for omxplayer
     # Swipe right
     elif delta_x > MAX_X / 2:
-        SendMPV("playlist-next")
+        logging.info("Detected swipe right (next)")
+        # You can implement playlist next logic if needed for omxplayer
     # Left touch
     elif x < X_MARGIN:
-        SendMPV(f"seek {0-SEEK_SECS}")
-    # Middle touch
-    elif x > MAX_X - X_MARGIN:
-        SendMPV(f"seek {SEEK_SECS}")
+        logging.info(f"Seeking backward {SEEK_SECS} seconds")
+        SendOMX(f"seek {-SEEK_SECS}")
     # Right touch
+    elif x > MAX_X - X_MARGIN:
+        logging.info(f"Seeking forward {SEEK_SECS} seconds")
+        SendOMX(f"seek {SEEK_SECS}")
+    # Middle touch
     else:
-        SendMPV("cycle pause")
+        logging.info("Toggling pause/play")
+        SendOMX("pause")
 
 
 def main():
     logging.getLogger().setLevel(logging.INFO)
+
+    # Device path for the touch input, adjust this if needed
     device = evdev.InputDevice("/dev/input/event0")
     logging.info("Input device: %s", device)
 
-    # Key event comes before location event. So assume first key down is in middle of screen
+    # Key event comes before location event. Assume first key down is in middle of screen
     x = int(MAX_X / 2)
     y = int(MAX_Y / 2)
 
     down_x = None
     down_y = None
 
+    # Read input events in a loop
     for event in device.read_loop():
         if event.type == evdev.ecodes.EV_KEY:
             if event.code == evdev.ecodes.BTN_TOUCH:
-                if event.value == 0x0:
+                if event.value == 0x0:  # Touch release
                     delta_x = x - down_x
                     delta_y = y - down_y
                     Act(x, y, delta_x, delta_y)
-                if event.value == 0x1:
+                if event.value == 0x1:  # Touch down
                     down_x = x
                     down_y = y
         elif event.type == evdev.ecodes.EV_ABS:
@@ -78,4 +96,5 @@ def main():
                 x = MAX_X - event.value
 
 
-main()
+if __name__ == "__main__":
+    main()
