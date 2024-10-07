@@ -3,9 +3,9 @@ Description=tvplayer
 After=network.target
 
 [Service]
-WorkingDirectory=/home/pi/
+WorkingDirectory=/home/pi/simpsonstv/
 User=pi
-ExecStart=/home/pi/start.sh
+ExecStart=/home/pi/simpsonstv/start.sh
 Restart=always
 
 [Install]
