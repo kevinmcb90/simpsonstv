@@ -1,11 +1,11 @@
 [Unit]
-Description=tvbuttons
+Description=tvbutton
 After=network.target
 
 [Service]
-WorkingDirectory=/home/pi/
+WorkingDirectory=/home/pi/simpsonstv/
 User=pi
-ExecStart=/usr/bin/python3 /home/pi/buttons.py
+ExecStart=/usr/bin/python /home/pi/simpsonstv/buttons.py
 Restart=always
 
 [Install]
