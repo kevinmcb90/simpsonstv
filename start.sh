@@ -6,6 +6,7 @@ find /home/pi/simpsonstv/videos -name "*.mp4" -print0 | shuf -z | while IFS= rea
 
     omxplayer \
         --no-osd \
+        --no-keys \
         --aspect-mode fill \
         "$video"
 done
