@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 mpv \
   --input-ipc-server=/tmp/mpvsocket \
