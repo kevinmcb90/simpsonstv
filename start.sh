@@ -1,10 +1,11 @@
 #!/bin/bash
 
-mpv \
-  --input-ipc-server=/tmp/mpvsocket \
-  --osd-duration=5000 \
-  --osd-font-size=80 \
-  --osd-playing-msg='${filename/no-ext}' \
-  --osd-on-seek=msg-bar \
-  --shuffle \
-  /video/*/*.mp4
+find /video -name "*.mp4" -print0 | shuf -z | while IFS= read -r -d '' video; do
+    filename=$(basename "$video")
+    filename_no_ext="${filename%.*}"
+
+    omxplayer \
+        --no-osd \
+        --aspect-mode fill \
+        "$video"
+done
