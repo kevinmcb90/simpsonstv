@@ -39,11 +39,11 @@ def Act(x: int, y: int, delta_x: int, delta_y: int):
         SendMPV("playlist-next")
     # Left touch
     elif x < X_MARGIN:
-        SendMPV(f"seek {0-SEEK_SECS}")
-    # Middle touch
-    elif x > MAX_X - X_MARGIN:
         SendMPV(f"seek {SEEK_SECS}")
     # Right touch
+    elif x > MAX_X - X_MARGIN:
+        SendMPV(f"seek {0-SEEK_SECS}")
+    # Middle touch
     else:
         SendMPV("cycle pause")
 
